@@ -11,8 +11,8 @@
 Clone the repository and navigate into the directory:
 
 ```bash
-git clone https://github.com/searxng/data-searxng.git
-cd data-searxng
+git clone https://github.com/Sooriya04/Talven.git
+cd Talven
 ```
 
 _(Note: Replace the URL with your actual repository URL if different)_
@@ -23,10 +23,11 @@ Create a virtual environment (optional but recommended) and install required pac
 
 ```bash
 # Create virtual environment
-python -m venv venv
+py -3.10 -m venv .talven
+
 
 # Activate it (Windows)
-venv\Scripts\activate
+.talven\Scripts\activate
 
 # Activate it (Linux/Mac)
 source venv/bin/activate
