@@ -16,7 +16,7 @@ from typing_extensions import override
 from .brand import SettingsBrand
 from .sxng_locales import sxng_locales
 
-searx_dir = abspath(dirname(__file__))
+talven_dir = abspath(dirname(__file__))
 
 logger = logging.getLogger('searx')
 OUTPUT_FORMATS = ['html', 'csv', 'json', 'rss']
@@ -197,12 +197,12 @@ SCHEMA: dict[str, t.Any] = {
         'ban_time_on_fail': SettingsValue(numbers.Real, 5),
         'max_ban_time_on_fail': SettingsValue(numbers.Real, 120),
         'suspended_times': {
-            'SearxEngineAccessDenied': SettingsValue(numbers.Real, 86400),
-            'SearxEngineCaptcha': SettingsValue(numbers.Real, 86400),
-            'SearxEngineTooManyRequests': SettingsValue(numbers.Real, 3600),
-            'cf_SearxEngineCaptcha': SettingsValue(numbers.Real, 1296000),
-            'cf_SearxEngineAccessDenied': SettingsValue(numbers.Real, 86400),
-            'recaptcha_SearxEngineCaptcha': SettingsValue(numbers.Real, 604800),
+            'TalvenEngineAccessDenied': SettingsValue(numbers.Real, 86400),
+            'TalvenEngineCaptcha': SettingsValue(numbers.Real, 86400),
+            'TalvenEngineTooManyRequests': SettingsValue(numbers.Real, 3600),
+            'cf_TalvenEngineCaptcha': SettingsValue(numbers.Real, 1296000),
+            'cf_TalvenEngineAccessDenied': SettingsValue(numbers.Real, 86400),
+            'recaptcha_TalvenEngineCaptcha': SettingsValue(numbers.Real, 604800),
         },
         'formats': SettingsValue(list, OUTPUT_FORMATS),
         'max_page': SettingsValue(int, 0),
@@ -227,8 +227,8 @@ SCHEMA: dict[str, t.Any] = {
         'url': SettingsValue((None, False, str), False, 'SEARXNG_VALKEY_URL'),
     },
     'ui': {
-        'static_path': SettingsDirectoryValue(str, os.path.join(searx_dir, 'static')),
-        'templates_path': SettingsDirectoryValue(str, os.path.join(searx_dir, 'templates')),
+        'static_path': SettingsValue(str, ''),
+        'templates_path': SettingsValue(str, ''),
         'default_theme': SettingsValue(str, 'simple'),
         'default_locale': SettingsValue(str, ''),
         'theme_args': {

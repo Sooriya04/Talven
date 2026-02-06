@@ -25,15 +25,15 @@ from pathlib import Path
 
 import yaml
 
-from talven.exceptions import talvenSettingsException
+from talven.exceptions import TalvenSettingsException
 
 JSONType: t.TypeAlias = dict[str, "JSONType"] | list["JSONType"] | str | int | float | bool | None
 SettingsType: t.TypeAlias = dict[str, JSONType]
 
-searx_dir = os.path.abspath(os.path.dirname(__file__))
+talven_dir = os.path.abspath(os.path.dirname(__file__))
 
 SETTINGS_YAML = Path("settings.yml")
-DEFAULT_SETTINGS_FILE = Path(searx_dir) / SETTINGS_YAML
+DEFAULT_SETTINGS_FILE = Path(talven_dir) / SETTINGS_YAML
 """The :origin:`searx/settings.yml` file with all the default settings."""
 
 
@@ -43,9 +43,9 @@ def load_yaml(file_name: str | Path) -> SettingsType:
         with open(file_name, 'r', encoding='utf-8') as settings_yaml:
             return yaml.safe_load(settings_yaml) or {}
     except IOError as e:
-        raise SearxSettingsException(e, str(file_name)) from e
+        raise TalvenSettingsException(e, str(file_name)) from e
     except yaml.YAMLError as e:
-        raise SearxSettingsException(e, str(file_name)) from e
+        raise TalvenSettingsException(e, str(file_name)) from e
 
 
 def get_yaml_cfg(file_name: str | Path) -> SettingsType:
@@ -55,7 +55,7 @@ def get_yaml_cfg(file_name: str | Path) -> SettingsType:
     - in the ``searx`` folder of the SearXNG installation
     """
 
-    folder = get_user_cfg_folder() or Path(searx_dir)
+    folder = get_user_cfg_folder() or Path(talven_dir)
     fname = folder / file_name
     if not fname.is_file():
         raise FileNotFoundError(f"File {fname} does not exist!")
