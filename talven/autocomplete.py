@@ -17,7 +17,7 @@ from talven.engines import (
     google,
 )
 from talven.network import get as http_get, post as http_post  # pyright: ignore[reportUnknownVariableType]
-from talven.exceptions import talvenEngineResponseException
+from talven.exceptions import TalvenEngineResponseException
 from talven.utils import extr, gen_useragent
 
 if t.TYPE_CHECKING:
@@ -368,5 +368,5 @@ def search_autocomplete(backend_name: str, query: str, sxng_locale: str) -> list
         return []
     try:
         return backend(query, sxng_locale)
-    except (HTTPError, SearxEngineResponseException):
+    except (HTTPError, TalvenEngineResponseException):
         return []
