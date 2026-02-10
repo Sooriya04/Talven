@@ -170,9 +170,9 @@ ui:
 #
 outgoing:
   # default timeout in seconds, can be override by engine
-  request_timeout: 3.0
+  request_timeout: 15.0
   # the maximum timeout in seconds
-  # max_request_timeout: 10.0
+  max_request_timeout: 30.0
   # suffix of searxng_useragent, could contain information like an email address
   # to the administrator
   useragent_suffix: ''
@@ -365,7 +365,7 @@ engines:
     adobe_order: relevance
     adobe_content_types:
       ['photo', 'illustration', 'zip_vector', 'template', '3d', 'image']
-    timeout: 6
+    timeout: 20
     disabled: true
 
   - name: adobe stock video
@@ -544,7 +544,7 @@ engines:
   - name: bing
     engine: bing
     shortcut: bi
-    disabled: true
+    disabled: false
 
   - name: bing images
     engine: bing_images
@@ -831,21 +831,21 @@ engines:
     categories: [images, web]
     ddg_category: images
     shortcut: ddi
-    disabled: true
+    disabled: false
 
   - name: duckduckgo videos
     engine: duckduckgo_extra
     categories: [videos, web]
     ddg_category: videos
     shortcut: ddv
-    disabled: true
+    disabled: false
 
   - name: duckduckgo news
     engine: duckduckgo_extra
     categories: [news, web]
     ddg_category: news
     shortcut: ddn
-    disabled: true
+    disabled: false
 
   - name: duckduckgo weather
     engine: duckduckgo_weather
