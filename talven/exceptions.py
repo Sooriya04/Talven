@@ -7,11 +7,11 @@ if t.TYPE_CHECKING:
     from lxml.etree import XPath
 
 
-class SearxException(Exception):
-    """Base SearXNG exception."""
+class TalvenException(Exception):
+    """Base Talven exception."""
 
 
-class SearxParameterException(SearxException):
+class TalvenParameterException(TalvenException):
     """Raised when query miss a required parameter"""
 
     def __init__(self, name: str, value: t.Any):
@@ -26,7 +26,7 @@ class SearxParameterException(SearxException):
 
 
 @t.final
-class SearxSettingsException(SearxException):
+class TalvenSettingsException(TalvenException):
     """Error while loading the settings"""
 
     def __init__(self, message: str | Exception, filename: str | None):
@@ -35,11 +35,11 @@ class SearxSettingsException(SearxException):
         self.filename = filename
 
 
-class SearxEngineException(SearxException):
+class TalvenEngineException(TalvenException):
     """Error inside an engine"""
 
 
-class SearxXPathSyntaxException(SearxEngineException):
+class TalvenXPathSyntaxException(TalvenEngineException):
     """Syntax error in a XPATH"""
 
     def __init__(self, xpath_spec: "str | XPath", message: str):
@@ -49,18 +49,18 @@ class SearxXPathSyntaxException(SearxEngineException):
         self.xpath_str: str = str(xpath_spec)
 
 
-class SearxEngineResponseException(SearxEngineException):
+class TalvenEngineResponseException(TalvenEngineException):
     """Impossible to parse the result of an engine"""
 
 
-class SearxEngineAPIException(SearxEngineResponseException):
+class TalvenEngineAPIException(TalvenEngineResponseException):
     """The website has returned an application error"""
 
 
-class SearxEngineAccessDeniedException(SearxEngineResponseException):
+class TalvenEngineAccessDeniedException(TalvenEngineResponseException):
     """The website is blocking the access"""
 
-    SUSPEND_TIME_SETTING: str = "search.suspended_times.SearxEngineAccessDenied"
+    SUSPEND_TIME_SETTING: str = "search.suspended_times.TalvenEngineAccessDenied"
     """This settings contains the default suspended time (default 86400 sec / 1
     day)."""
 
@@ -85,10 +85,10 @@ class SearxEngineAccessDeniedException(SearxEngineResponseException):
         return get_setting(self.SUSPEND_TIME_SETTING)
 
 
-class SearxEngineCaptchaException(SearxEngineAccessDeniedException):
+class TalvenEngineCaptchaException(TalvenEngineAccessDeniedException):
     """The website has returned a CAPTCHA."""
 
-    SUSPEND_TIME_SETTING: str = "search.suspended_times.SearxEngineCaptcha"
+    SUSPEND_TIME_SETTING: str = "search.suspended_times.TalvenEngineCaptcha"
     """This settings contains the default suspended time (default 86400 sec / 1
     day)."""
 
@@ -96,13 +96,13 @@ class SearxEngineCaptchaException(SearxEngineAccessDeniedException):
         super().__init__(message=message, suspended_time=suspended_time)
 
 
-class SearxEngineTooManyRequestsException(SearxEngineAccessDeniedException):
+class TalvenEngineTooManyRequestsException(TalvenEngineAccessDeniedException):
     """The website has returned a Too Many Request status code
 
-    By default, SearXNG stops sending requests to this engine for 1 hour.
+    By default, Talven stops sending requests to this engine for 1 hour.
     """
 
-    SUSPEND_TIME_SETTING: str = "search.suspended_times.SearxEngineTooManyRequests"
+    SUSPEND_TIME_SETTING: str = "search.suspended_times.TalvenEngineTooManyRequests"
     """This settings contains the default suspended time (default 3660 sec / 1
     hour)."""
 
@@ -110,7 +110,7 @@ class SearxEngineTooManyRequestsException(SearxEngineAccessDeniedException):
         super().__init__(message=message, suspended_time=suspended_time)
 
 
-class SearxEngineXPathException(SearxEngineResponseException):
+class TalvenEngineXPathException(TalvenEngineResponseException):
     """Error while getting the result of an XPath expression"""
 
     def __init__(self, xpath_spec: "str | XPath", message: str):
