@@ -40,7 +40,7 @@ from flask.ctx import has_request_context
 from talven import (
     data,
     logger,
-    searx_dir,
+    talven_dir,
 )
 from talven.extended_types import sxng_request
 
@@ -129,7 +129,7 @@ def get_translation_locales() -> list[str]:
         return _TR_LOCALES
 
     tr_locales: list[str] = []
-    for folder in (Path(searx_dir) / 'translations').iterdir():
+    for folder in (Path(talven_dir) / 'translations').iterdir():
         if not folder.is_dir():
             continue
         if not (folder / 'LC_MESSAGES').is_dir():

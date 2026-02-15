@@ -18,8 +18,8 @@ LOG_FORMAT_DEBUG: str = '%(levelname)-7s %(name)-30.30s: %(message)s'
 LOG_FORMAT_PROD: str = '%(asctime)-15s %(levelname)s:%(name)s: %(message)s'
 LOG_LEVEL_PROD = logging.WARNING
 
-searx_dir: str = abspath(dirname(__file__))
-searx_parent_dir: str = abspath(dirname(dirname(__file__)))
+talven_dir: str = abspath(dirname(__file__))
+talven_parent_dir: str = abspath(dirname(dirname(__file__)))
 
 settings: dict[str, t.Any] = {}
 
