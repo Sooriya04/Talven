@@ -17,7 +17,7 @@ import babel.core
 
 import talven.plugins
 
-from talven import settings, autocomplete, favicons
+from talven import settings, autocomplete
 from talven.enginelib import Engine
 from talven.engines import DEFAULT_CATEGORY
 from talven.extended_types import SXNG_Request
@@ -421,11 +421,6 @@ class Preferences:
                 settings['search']['autocomplete'],
                 locked=is_locked('autocomplete'),
                 choices=list(autocomplete.backends.keys()) + ['']
-            ),
-            'favicon_resolver': EnumStringSetting(
-                settings['search']['favicon_resolver'],
-                locked=is_locked('favicon_resolver'),
-                choices=list(favicons.proxy.CFG.resolver_map.keys()) + ['']
             ),
             'image_proxy': BooleanSetting(
                 settings['server']['image_proxy'],
