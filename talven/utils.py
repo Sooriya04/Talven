@@ -28,7 +28,7 @@ from talven import settings
 from talven.data import USER_AGENTS, data_dir, gsa_useragents_loader
 from talven.version import VERSION_TAG
 from talven.sxng_locales import sxng_locales
-from talven.exceptions import talvenXPathSyntaxException, SearxEngineXPathException
+from talven.exceptions import TalvenXPathSyntaxException, TalvenEngineXPathException
 from talven import logger
 
 if t.TYPE_CHECKING:
@@ -76,9 +76,9 @@ class _NotSetClass:  # pylint: disable=too-few-public-methods
 _NOTSET = _NotSetClass()
 
 
-def searxng_useragent() -> str:
-    """Return the SearXNG User Agent"""
-    return f"SearXNG/{VERSION_TAG} {settings['outgoing']['useragent_suffix']}".strip()
+def talven_useragent() -> str:
+    """Return the Talven User Agent"""
+    return f"Talven/{VERSION_TAG} {settings['outgoing']['useragent_suffix']}".strip()
 
 
 def gen_useragent(os_string: str | None = None) -> str:
@@ -535,7 +535,7 @@ def get_xpath(xpath_spec: XPathSpecType) -> XPath:
             try:
                 result = XPath(xpath_spec)
             except XPathSyntaxError as e:
-                raise SearxXPathSyntaxException(xpath_spec, str(e.msg)) from e
+                raise TalvenXPathSyntaxException(xpath_spec, str(e.msg)) from e
             _XPATH_CACHE[xpath_spec] = result
         return result
 
@@ -560,7 +560,7 @@ def eval_xpath(element: ElementType, xpath_spec: XPathSpecType) -> t.Any:
     ``SearxXPathSyntaxException``:
       Raised when there is a syntax error in the *XPath* selector (``str``).
 
-    ``SearxEngineXPathException:``
+    ``TalvenEngineXPathException:``
       Raised when the XPath can't be evaluated (masked
       :py:obj:`lxml.etree..XPathError`).
     """
@@ -570,7 +570,7 @@ def eval_xpath(element: ElementType, xpath_spec: XPathSpecType) -> t.Any:
         return xpath(element)
     except XPathError as e:
         arg = ' '.join([str(i) for i in e.args])
-        raise SearxEngineXPathException(xpath_spec, arg) from e
+        raise TalvenEngineXPathException(xpath_spec, arg) from e
 
 
 def eval_xpath_list(element: ElementType, xpath_spec: XPathSpecType, min_len: int | None = None) -> list[t.Any]:
@@ -580,9 +580,9 @@ def eval_xpath_list(element: ElementType, xpath_spec: XPathSpecType, min_len: in
 
     result: list[t.Any] = eval_xpath(element, xpath_spec)
     if not isinstance(result, list):
-        raise SearxEngineXPathException(xpath_spec, 'the result is not a list')
+        raise TalvenEngineXPathException(xpath_spec, 'the result is not a list')
     if min_len is not None and min_len > len(result):
-        raise SearxEngineXPathException(xpath_spec, 'len(xpath_str) < ' + str(min_len))
+        raise TalvenEngineXPathException(xpath_spec, 'len(xpath_str) < ' + str(min_len))
     return result
 
 
@@ -604,9 +604,9 @@ def eval_xpath_getindex(
     if -len(result) <= index < len(result):
         return result[index]
     if default == _NOTSET:
-        # raise an SearxEngineXPathException instead of IndexError to record
+        # raise an TalvenEngineXPathException instead of IndexError to record
         # xpath_spec
-        raise SearxEngineXPathException(xpath_spec, 'index ' + str(index) + ' not found')
+        raise TalvenEngineXPathException(xpath_spec, 'index ' + str(index) + ' not found')
     return default
 
 
