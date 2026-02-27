@@ -13,7 +13,7 @@ from talven import logger
 from talven.engines import engines
 from talven.network import get_time_for_thread, get_network
 from talven.metrics import histogram_observe, counter_inc, count_exception, count_error
-from talven.exceptions import talvenEngineAccessDeniedException
+from talven.exceptions import TalvenEngineAccessDeniedException
 from talven.utils import get_engine_from_settings
 
 if t.TYPE_CHECKING:
@@ -186,7 +186,7 @@ class EngineProcessor(ABC):
         # suspend the engine ?
         if suspend:
             suspended_time = None
-            if isinstance(exception_or_message, SearxEngineAccessDeniedException):
+            if isinstance(exception_or_message, TalvenEngineAccessDeniedException):
                 suspended_time = exception_or_message.suspended_time
             self.suspended_status.suspend(suspended_time, error_message)  # pylint: disable=no-member
 

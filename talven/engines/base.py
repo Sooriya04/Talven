@@ -5,7 +5,7 @@ import re
 
 from urllib.parse import urlencode
 from lxml import etree
-from talven.utils import talvenng_useragent
+from talven.utils import talven_useragent
 
 # about
 about = {
@@ -67,7 +67,7 @@ def request(query, params):
 
     params['url'] = base_url.format(**string_args)
 
-    params['headers']['User-Agent'] = searxng_useragent()
+    params['headers']['User-Agent'] = talven_useragent()
     return params
 
 

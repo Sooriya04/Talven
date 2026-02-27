@@ -22,7 +22,7 @@ URL = 'https://raw.githubusercontent.com/intoli/user-agents/main/src/user-agents
 
 
 def fetch_gsa_useragents() -> list[str]:
-    response = http_get(URL, timeout=3.0, headers={"User-Agent": searxng_useragent()})
+    response = http_get(URL, timeout=3.0, headers={"User-Agent": talven_useragent()})
     response.raise_for_status()
 
     uas = []

@@ -3,9 +3,9 @@
 
 import typing as t
 from talven.exceptions import (
-    SearxEngineCaptchaException,
-    SearxEngineTooManyRequestsException,
-    SearxEngineAccessDeniedException,
+    TalvenEngineAccessDeniedException,
+    TalvenEngineCaptchaException,
+    TalvenEngineTooManyRequestsException,
 )
 from talven import get_setting
 
@@ -35,21 +35,21 @@ def raise_for_cloudflare_captcha(resp: "SXNG_Response"):
         if is_cloudflare_challenge(resp):
             # https://support.cloudflare.com/hc/en-us/articles/200170136-Understanding-Cloudflare-Challenge-Passage-Captcha-
             # suspend for 2 weeks
-            raise SearxEngineCaptchaException(
-                message='Cloudflare CAPTCHA', suspended_time=get_setting('search.suspended_times.cf_SearxEngineCaptcha')
+            raise TalvenEngineCaptchaException(
+                message='Cloudflare CAPTCHA', suspended_time=get_setting('search.suspended_times.cf_TalvenEngineCaptcha')
             )
 
         if is_cloudflare_firewall(resp):
-            raise SearxEngineAccessDeniedException(
+            raise TalvenEngineAccessDeniedException(
                 message='Cloudflare Firewall',
-                suspended_time=get_setting('search.suspended_times.cf_SearxEngineAccessDenied'),
+                suspended_time=get_setting('search.suspended_times.cf_TalvenEngineAccessDenied'),
             )
 
 
 def raise_for_recaptcha(resp: "SXNG_Response"):
     if resp.status_code == 503 and '"https://www.google.com/recaptcha/' in resp.text:
-        raise SearxEngineCaptchaException(
-            message='ReCAPTCHA', suspended_time=get_setting('search.suspended_times.recaptcha_SearxEngineCaptcha')
+        raise TalvenEngineCaptchaException(
+            message='ReCAPTCHA', suspended_time=get_setting('search.suspended_times.recaptcha_TalvenEngineCaptcha')
         )
 
 
@@ -65,15 +65,16 @@ def raise_for_httperror(resp: "SXNG_Response") -> None:
         resp (requests.Response): Response to check
 
     Raises:
+    Raises:
         requests.HTTPError: raise by resp.raise_for_status()
-        talven.exceptions.SearxEngineAccessDeniedException: raise when the HTTP status code is 402 or 403.
-        talven.exceptions.SearxEngineTooManyRequestsException: raise when the HTTP status code is 429.
-        talven.exceptions.SearxEngineCaptchaException: raise when if CATPCHA challenge is detected.
+        talven.exceptions.TalvenEngineAccessDeniedException: raise when the HTTP status code is 402 or 403.
+        talven.exceptions.TalvenEngineTooManyRequestsException: raise when the HTTP status code is 429.
+        talven.exceptions.TalvenEngineCaptchaException: raise when if CATPCHA challenge is detected.
     """
     if resp.status_code and resp.status_code >= 400:
         raise_for_captcha(resp)
         if resp.status_code in (402, 403):
-            raise SearxEngineAccessDeniedException(message='HTTP error ' + str(resp.status_code))
+            raise TalvenEngineAccessDeniedException(message='HTTP error ' + str(resp.status_code))
         if resp.status_code == 429:
-            raise SearxEngineTooManyRequestsException()
+            raise TalvenEngineTooManyRequestsException()
         resp.raise_for_status()

@@ -50,10 +50,10 @@ import babel
 import lxml
 
 from talven.exceptions import (
-    SearxEngineAPIException,
-    SearxEngineTooManyRequestsException,
-    SearxEngineCaptchaException,
-    SearxEngineAccessDeniedException,
+    TalvenEngineAPIException,
+    TalvenEngineTooManyRequestsException,
+    TalvenEngineCaptchaException,
+    TalvenEngineAccessDeniedException,
 )
 from talven.network import raise_for_httperror
 from talven.enginelib.traits import EngineTraits
@@ -200,13 +200,13 @@ def parse_web_api(resp):
     if search_results.get('status') != 'success':
         error_code = data.get('error_code')
         if error_code == 24:
-            raise SearxEngineTooManyRequestsException()
+            raise TalvenEngineTooManyRequestsException()
         if search_results.get("data", {}).get("error_data", {}).get("captchaUrl") is not None:
-            raise SearxEngineCaptchaException()
+            raise TalvenEngineCaptchaException()
         if resp.status_code == 403:
-            raise SearxEngineAccessDeniedException()
+            raise TalvenEngineAccessDeniedException()
         msg = ",".join(data.get('message', ['unknown']))
-        raise SearxEngineAPIException(f"{msg} ({error_code})")
+        raise TalvenEngineAPIException(f"{msg} ({error_code})")
 
     # raise for other errors
     raise_for_httperror(resp)

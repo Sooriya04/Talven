@@ -6,7 +6,7 @@ ends.
 """
 
 from json import dumps
-from talven.utils import talvenng_useragent
+from talven.utils import talven_useragent
 from talven.enginelib.traits import EngineTraits
 
 about = {
@@ -29,7 +29,7 @@ def request(query, params):
     params['headers'] = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'User-Agent': searxng_useragent(),
+        'User-Agent': talven_useragent(),
     }
     region = traits.get_region(params["searxng_locale"], default=traits.all_locale)
     params['data'] = dumps(

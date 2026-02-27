@@ -3,7 +3,7 @@
 
 from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
-from talven.exceptions import talvenParameterException
+from talven.exceptions import TalvenParameterException
 from talven.webutils import VALID_LANGUAGE_CODE
 from talven.query import RawTextQuery
 from talven.engines import categories, engines
@@ -49,7 +49,7 @@ def validate_engineref_list(
 def parse_pageno(form: Dict[str, str]) -> int:
     pageno_param = form.get('pageno', '1')
     if not pageno_param.isdigit() or int(pageno_param) < 1:
-        raise SearxParameterException('pageno', pageno_param)
+        raise TalvenParameterException('pageno', pageno_param)
     return int(pageno_param)
 
 
@@ -68,7 +68,7 @@ def parse_lang(preferences: Preferences, form: Dict[str, str], raw_text_query: R
 
     # check language
     if not VALID_LANGUAGE_CODE.match(query_lang) and query_lang != 'auto':
-        raise SearxParameterException('language', query_lang)
+        raise TalvenParameterException('language', query_lang)
 
     return query_lang
 
@@ -81,14 +81,14 @@ def parse_safesearch(preferences: Preferences, form: Dict[str, str]) -> int:
         query_safesearch = form.get('safesearch')
         # first check safesearch
         if not query_safesearch.isdigit():
-            raise SearxParameterException('safesearch', query_safesearch)
+            raise TalvenParameterException('safesearch', query_safesearch)
         query_safesearch = int(query_safesearch)
     else:
         query_safesearch = preferences.get_value('safesearch')
 
     # safesearch : second check
     if query_safesearch < 0 or query_safesearch > 2:
-        raise SearxParameterException('safesearch', query_safesearch)
+        raise TalvenParameterException('safesearch', query_safesearch)
 
     return query_safesearch
 
@@ -98,7 +98,7 @@ def parse_time_range(form: Dict[str, str]) -> Optional[str]:
     # check time_range
     query_time_range = None if query_time_range in ('', 'None') else query_time_range
     if query_time_range not in (None, 'day', 'week', 'month', 'year'):
-        raise SearxParameterException('time_range', query_time_range)
+        raise TalvenParameterException('time_range', query_time_range)
     return query_time_range
 
 
@@ -112,7 +112,7 @@ def parse_timeout(form: Dict[str, str], raw_text_query: RawTextQuery) -> Optiona
     try:
         return float(timeout_limit)
     except ValueError as e:
-        raise SearxParameterException('timeout_limit', timeout_limit) from e
+        raise TalvenParameterException('timeout_limit', timeout_limit) from e
 
 
 def parse_category_form(query_categories: List[str], name: str, value: str) -> None:
@@ -244,7 +244,7 @@ def get_search_query_from_webapp(
     """
     # no text for the query ?
     if not form.get('q'):
-        raise SearxParameterException('q', '')
+        raise TalvenParameterException('q', '')
 
     # set blocked engines
     disabled_engines = preferences.engines.get_disabled()

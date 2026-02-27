@@ -27,7 +27,7 @@ import typing as t
 from urllib.parse import urlencode
 from lxml import html
 
-from talven.utils import eval_xpath, eval_xpath_list, extract_text, searxng_useragent
+from talven.utils import eval_xpath, eval_xpath_list, extract_text, talven_useragent
 from talven.result_types import EngineResults
 
 if t.TYPE_CHECKING:
@@ -65,7 +65,7 @@ def request(query: str, params: "OnlineParams") -> None:
     params["url"] = f"{base_url}?{urlencode(args)}"
 
     # standard user agents are blocked by 'go-away', a foss bot detection tool
-    params["headers"]["User-Agent"] = searxng_useragent()
+    params["headers"]["User-Agent"] = talven_useragent()
 
 
 def response(resp: "SXNG_Response") -> EngineResults:

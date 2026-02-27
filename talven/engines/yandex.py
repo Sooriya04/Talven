@@ -5,7 +5,7 @@ from json import loads
 from urllib.parse import urlencode
 from html import unescape
 from lxml import html
-from talven.exceptions import talvenEngineCaptchaException
+from talven.exceptions import TalvenEngineCaptchaException
 from talven.utils import humanize_bytes, eval_xpath, eval_xpath_list, extract_text, extr
 
 
@@ -50,7 +50,7 @@ content_xpath = './/div[@class="b-serp-item__content"]//div[@class="b-serp-item_
 
 def catch_bad_response(resp):
     if resp.headers.get('x-yandex-captcha') == 'captcha':
-        raise SearxEngineCaptchaException()
+        raise TalvenEngineCaptchaException()
 
 
 def request(query, params):

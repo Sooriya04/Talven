@@ -2,7 +2,7 @@
 """Cloudflare AI engine"""
 
 from json import loads, dumps
-from talven.exceptions import talvenEngineAPIException
+from talven.exceptions import TalvenEngineAPIException
 
 about = {
     "website": 'https://ai.cloudflare.com',
@@ -55,7 +55,7 @@ def response(resp):
     json = loads(resp.text)
 
     if 'error' in json:
-        raise SearxEngineAPIException('Cloudflare AI error: ' + json['error'])
+        raise TalvenEngineAPIException('Cloudflare AI error: ' + json['error'])
 
     if 'result' in json:
         results.append(

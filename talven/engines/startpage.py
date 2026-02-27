@@ -93,7 +93,7 @@ import babel.localedata
 
 from talven.utils import extr, extract_text, eval_xpath, gen_useragent, html_to_text, humanize_bytes, remove_pua_from_str
 from talven.network import get  # see https://github.com/searxng/searxng/issues/762
-from talven.exceptions import talvenEngineCaptchaException
+from talven.exceptions import TalvenEngineCaptchaException
 from talven.locales import region_tag
 from talven.enginelib.traits import EngineTraits
 from talven.enginelib import EngineCache
@@ -215,7 +215,7 @@ def get_sc_code(searxng_locale, params):
     # ?? ping-back URL: https://www.startpage.com/sp/pb?sc=TLsB0oITjZ8F21
 
     if str(resp.url).startswith('https://www.startpage.com/sp/captcha'):  # type: ignore
-        raise SearxEngineCaptchaException(
+        raise TalvenEngineCaptchaException(
             message="get_sc_code: got redirected to https://www.startpage.com/sp/captcha",
         )
 
@@ -225,7 +225,7 @@ def get_sc_code(searxng_locale, params):
         sc_code = eval_xpath(dom, search_form_xpath + '//input[@name="sc"]/@value')[0]
     except IndexError as exc:
         logger.debug("suspend startpage API --> https://github.com/searxng/searxng/pull/695")
-        raise SearxEngineCaptchaException(
+        raise TalvenEngineCaptchaException(
             message="get_sc_code: [PR-695] querying new sc timestamp failed! (%s)" % resp.url,  # type: ignore
         ) from exc
 
@@ -406,7 +406,7 @@ def response(resp):
     results_raw = '{' + extr(resp.text, f"React.createElement(UIStartpage.AppSerp{categ}, {{", '}})') + '}}'
 
     if resp.headers.get('Location', '').startswith("https://www.startpage.com/sp/captcha"):
-        raise SearxEngineCaptchaException()
+        raise TalvenEngineCaptchaException()
 
     results_json = loads(results_raw)
     results_obj = results_json.get('render', {}).get('presenter', {}).get('regions', {})

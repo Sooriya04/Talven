@@ -25,7 +25,7 @@ from talven.utils import (
 from talven.network import get  # see https://github.com/searxng/searxng/issues/762
 from talven.enginelib.traits import EngineTraits
 from talven.enginelib import EngineCache
-from talven.exceptions import talvenEngineCaptchaException
+from talven.exceptions import TalvenEngineCaptchaException
 from talven.result_types import EngineResults
 
 about = {
@@ -339,7 +339,7 @@ def response(resp) -> EngineResults:
 
     if is_ddg_captcha(doc):
         # set suspend time to zero is OK --> ddg does not block the IP
-        raise SearxEngineCaptchaException(suspended_time=0, message=f"CAPTCHA ({resp.search_params['data'].get('kl')})")
+        raise TalvenEngineCaptchaException(suspended_time=0, message=f"CAPTCHA ({resp.search_params['data'].get('kl')})")
 
     form = eval_xpath(doc, '//input[@name="vqd"]/..')
     if len(form):

@@ -19,7 +19,7 @@ URL = 'https://ahmia.fi/blacklist/banned/'
 
 
 def fetch_ahmia_blacklist():
-    resp = requests.get(URL, timeout=3.0, headers={"User-Agent": searxng_useragent()})
+    resp = requests.get(URL, timeout=3.0, headers={"User-Agent": talven_useragent()})
     if resp.status_code != 200:
         # pylint: disable=broad-exception-raised
         raise Exception("Error fetching Ahmia blacklist, HTTP code " + str(resp.status_code))

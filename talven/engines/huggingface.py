@@ -36,7 +36,7 @@ Implementations
 from urllib.parse import urlencode
 from datetime import datetime
 
-from talven.exceptions import talvenEngineAPIException
+from talven.exceptions import TalvenEngineAPIException
 from talven.utils import html_to_text
 from talven.result_types import EngineResults, MainResult
 
@@ -64,7 +64,7 @@ huggingface_endpoint = 'models'
 
 def init(_):
     if huggingface_endpoint not in ('datasets', 'models', 'spaces'):
-        raise SearxEngineAPIException(f"Unsupported Hugging Face endpoint: {huggingface_endpoint}")
+        raise TalvenEngineAPIException(f"Unsupported Hugging Face endpoint: {huggingface_endpoint}")
 
 
 def request(query, params):

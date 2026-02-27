@@ -19,13 +19,13 @@ from pathlib import Path
 from pprint import pformat
 import babel
 
-from talven import settings, searx_dir
+from talven import settings, talven_dir
 from talven import network
 from talven.engines import load_engines
 from talven.enginelib.traits import EngineTraitsMap
 
 # Output files.
-languages_file = Path(searx_dir) / 'sxng_locales.py'
+languages_file = Path(talven_dir) / 'sxng_locales.py'
 languages_file_header = """\
 # SPDX-License-Identifier: AGPL-3.0-or-later
 '''List of SearXNG's locale codes used for the search language/region.

@@ -13,7 +13,7 @@ from html import unescape
 import time
 import json
 
-from talven.exceptions import talvenEngineAPIException, SearxEngineCaptchaException
+from talven.exceptions import TalvenEngineAPIException, TalvenEngineCaptchaException
 from talven.utils import html_to_text
 
 about = {
@@ -38,7 +38,7 @@ time_range_dict = {"day": 86400, "week": 604800, "month": 2592000, "year": 31536
 
 def init(_):
     if baidu_category not in ('general', 'images', 'it'):
-        raise SearxEngineAPIException(f"Unsupported category: {baidu_category}")
+        raise TalvenEngineAPIException(f"Unsupported category: {baidu_category}")
 
 
 def request(query, params):
@@ -96,7 +96,7 @@ def request(query, params):
 def response(resp):
     # Detect Baidu Captcha, it will redirect to wappass.baidu.com
     if 'wappass.baidu.com/static/captcha' in resp.headers.get('Location', ''):
-        raise SearxEngineCaptchaException()
+        raise TalvenEngineCaptchaException()
 
     text = resp.text
     if baidu_category == 'images':
@@ -111,7 +111,7 @@ def response(resp):
 def parse_general(data):
     results = []
     if not data.get("feed", {}).get("entry"):
-        raise SearxEngineAPIException("Invalid response")
+        raise TalvenEngineAPIException("Invalid response")
 
     for entry in data["feed"]["entry"]:
         if not entry.get("title") or not entry.get("url"):
@@ -173,7 +173,7 @@ def parse_images(data):
 def parse_it(data):
     results = []
     if not data.get("data", {}).get("documents", {}).get("data"):
-        raise SearxEngineAPIException("Invalid response")
+        raise TalvenEngineAPIException("Invalid response")
 
     for entry in data["data"]["documents"]["data"]:
         results.append(

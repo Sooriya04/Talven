@@ -13,7 +13,7 @@ from pygments.formatters.html import HtmlFormatter
 
 from talven import talven_dir
 
-LESS_FILE = Path(searx_dir).parent / 'client/simple/generated/pygments.less'
+LESS_FILE = Path(talven_dir).parent / 'client/simple/generated/pygments.less'
 
 HEADER = f"""\
 // SPDX-License-Identifier: AGPL-3.0-or-later

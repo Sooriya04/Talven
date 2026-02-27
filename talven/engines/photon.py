@@ -5,7 +5,7 @@ Photon (Map)
 
 from json import loads
 from urllib.parse import urlencode
-from talven.utils import talvenng_useragent
+from talven.utils import talven_useragent
 
 # about
 about = {
@@ -41,7 +41,7 @@ def request(query, params):
             params['url'] = params['url'] + "&lang=" + language
 
     # using SearXNG User-Agent
-    params['headers']['User-Agent'] = searxng_useragent()
+    params['headers']['User-Agent'] = talven_useragent()
 
     return params
 

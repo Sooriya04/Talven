@@ -14,7 +14,7 @@ from babel.dates import format_datetime, format_date, format_time, get_datetime_
 
 from talven.data import WIKIDATA_UNITS
 from talven.network import post, get
-from talven.utils import talvenng_useragent, get_string_replaces_function
+from talven.utils import talven_useragent, get_string_replaces_function
 from talven.external_urls import get_external_url, get_earth_coordinates_url, area_to_osm_zoom
 from talven.engines.wikipedia import (
     fetch_wikimedia_traits,
@@ -134,7 +134,7 @@ replace_http_by_https = get_string_replaces_function({'http:': 'https:'})
 
 def get_headers():
     # user agent: https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual#Query_limits
-    return {'Accept': 'application/sparql-results+json', 'User-Agent': searxng_useragent()}
+    return {'Accept': 'application/sparql-results+json', 'User-Agent': talven_useragent()}
 
 
 def get_label_for_entity(entity_id, language):

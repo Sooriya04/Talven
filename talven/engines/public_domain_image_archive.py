@@ -6,7 +6,7 @@ from json import dumps
 
 from talven.network import get
 from talven.utils import extr
-from talven.exceptions import talvenEngineAccessDeniedException, SearxEngineException
+from talven.exceptions import TalvenEngineAccessDeniedException, TalvenEngineException
 
 THUMBNAIL_SUFFIX = "?fit=max&h=360&w=360"
 """
@@ -113,10 +113,10 @@ def response(resp):
 
     if resp.status_code == 403:
         _clear_cached_api_url()
-        raise SearxEngineAccessDeniedException()
+        raise TalvenEngineAccessDeniedException()
 
     if resp.status_code != 200:
-        raise SearxEngineException()
+        raise TalvenEngineException()
 
     if 'results' not in json_data:
         return []

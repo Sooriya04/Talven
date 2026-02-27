@@ -37,7 +37,7 @@ from talven.utils import (
     ElementType,
 )
 
-from talven.exceptions import talvenEngineCaptchaException, SearxEngineAccessDeniedException
+from talven.exceptions import TalvenEngineCaptchaException, TalvenEngineAccessDeniedException
 
 from talven.engines.google import fetch_traits  # pylint: disable=unused-import
 from talven.engines.google import (
@@ -102,7 +102,7 @@ def response(resp: "SXNG_Response") -> EngineResults:  # pylint: disable=too-man
         if "/sorry/index?continue" in resp.headers["Location"]:
             # Our systems have detected unusual traffic from your computer
             # network. Please try again later.
-            raise SearxEngineAccessDeniedException(
+            raise TalvenEngineAccessDeniedException(
                 message="google_scholar: unusual traffic detected",
             )
         raise httpx.TooManyRedirects(f"location {resp.headers['Location'].split('?')[0]}")
@@ -202,7 +202,7 @@ def detect_google_captcha(dom: ElementType):
     not redirected to ``sorry.google.com``.
     """
     if eval_xpath(dom, "//form[@id='gs_captcha_f']"):
-        raise SearxEngineCaptchaException(message="CAPTCHA (gs_captcha_f)")
+        raise TalvenEngineCaptchaException(message="CAPTCHA (gs_captcha_f)")
 
 
 def parse_gs_a(text: str | None) -> tuple[list[str], str, str, datetime | None]:

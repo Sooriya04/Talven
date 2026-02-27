@@ -46,7 +46,7 @@ from lxml.etree import ElementBase
 from talven.utils import extract_text, eval_xpath, eval_xpath_getindex, eval_xpath_list
 from talven.enginelib.traits import EngineTraits
 from talven.data import ENGINE_TRAITS
-from talven.exceptions import talvenEngineXPathException
+from talven.exceptions import TalvenEngineXPathException
 
 from talven.result_types import EngineResults
 
@@ -154,7 +154,7 @@ def response(resp: "SXNG_Response") -> EngineResults:
     for item in eval_xpath_list(dom, "//main//div[contains(@class, 'js-aarecord-list-outer')]/div"):
         try:
             kwargs: dict[str, t.Any] = _get_result(item, resp.search_params["base_url"])
-        except SearxEngineXPathException:
+        except TalvenEngineXPathException:
             continue
         res.add(res.types.Paper(**kwargs))
     return res

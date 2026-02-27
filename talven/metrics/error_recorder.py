@@ -8,10 +8,10 @@ from json import JSONDecodeError
 from urllib.parse import urlparse
 from httpx import HTTPError, HTTPStatusError
 from talven.exceptions import (
-    SearxXPathSyntaxException,
-    SearxEngineXPathException,
-    SearxEngineAPIException,
-    SearxEngineAccessDeniedException,
+    TalvenXPathSyntaxException,
+    TalvenEngineXPathException,
+    TalvenEngineAPIException,
+    TalvenEngineAccessDeniedException,
 )
 from talven import talven_parent_dir, settings
 from talven.engines import engines
@@ -137,13 +137,13 @@ def get_messages(exc, filename) -> tuple[str, ...]:  # pylint: disable=too-many-
         return (str(exc),)
     if isinstance(exc, HTTPError):
         return get_request_exception_messages(exc)
-    if isinstance(exc, SearxXPathSyntaxException):
+    if isinstance(exc, TalvenXPathSyntaxException):
         return (exc.xpath_str, exc.message)
-    if isinstance(exc, SearxEngineXPathException):
+    if isinstance(exc, TalvenEngineXPathException):
         return (exc.xpath_str, exc.message)
-    if isinstance(exc, SearxEngineAPIException):
+    if isinstance(exc, TalvenEngineAPIException):
         return (str(exc.args[0]),)
-    if isinstance(exc, SearxEngineAccessDeniedException):
+    if isinstance(exc, TalvenEngineAccessDeniedException):
         return (exc.message,)
     return ()
 
@@ -162,8 +162,8 @@ def get_error_context(
 ) -> ErrorContext:
     searx_frame = get_trace(framerecords)
     filename = searx_frame.filename
-    if filename.startswith(searx_parent_dir):
-        filename = filename[len(searx_parent_dir) + 1 :]
+    if filename.startswith(talven_parent_dir):
+        filename = filename[len(talven_parent_dir) + 1 :]
     function = searx_frame.function
     line_no = searx_frame.lineno
     code = searx_frame.code_context[0].strip()

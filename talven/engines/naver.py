@@ -5,7 +5,7 @@
 from urllib.parse import urlencode
 from lxml import html
 
-from talven.exceptions import talvenEngineAPIException, SearxEngineXPathException
+from talven.exceptions import TalvenEngineAPIException, TalvenEngineXPathException
 from talven.result_types import EngineResults, MainResult
 from talven.utils import (
     eval_xpath_getindex,
@@ -69,7 +69,7 @@ naver_category_dict = {
 
 def init(_):
     if naver_category not in ('general', 'images', 'news', 'videos'):
-        raise SearxEngineAPIException(f"Unsupported category: {naver_category}")
+        raise TalvenEngineAPIException(f"Unsupported category: {naver_category}")
 
 
 def request(query, params):
@@ -103,7 +103,7 @@ def parse_general(data):
         thumbnail = None
         try:
             thumbnail = eval_xpath_getindex(item, ".//div[contains(@class, 'thumb_single')]//img/@data-lazysrc", 0)
-        except (ValueError, TypeError, SearxEngineXPathException):
+        except (ValueError, TypeError, TalvenEngineXPathException):
             pass
 
         results.add(
@@ -164,7 +164,7 @@ def parse_news(data):
                 ".//div[contains(@class, 'sds-comps-image') and contains(@class, 'sds-rego-thumb-overlay')]//img[@src]/@src",
                 0,
             )
-        except (ValueError, TypeError, SearxEngineXPathException):
+        except (ValueError, TypeError, TalvenEngineXPathException):
             pass
 
         if title and content and url:
@@ -191,7 +191,7 @@ def parse_videos(data):
         thumbnail = None
         try:
             thumbnail = eval_xpath_getindex(item, ".//img[contains(@class, 'thumb')]/@src", 0)
-        except (ValueError, TypeError, SearxEngineXPathException):
+        except (ValueError, TypeError, TalvenEngineXPathException):
             pass
 
         length = None

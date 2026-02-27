@@ -42,7 +42,7 @@ authentication configured to read from ``my-index`` index.
 """
 
 from json import loads, dumps
-from talven.exceptions import talvenEngineAPIException
+from talven.exceptions import TalvenEngineAPIException
 from talven.result_types import EngineResults
 from talven.extended_types import SXNG_Response
 
@@ -169,7 +169,7 @@ def response(resp: SXNG_Response) -> EngineResults:
 
     resp_json = loads(resp.text)
     if 'error' in resp_json:
-        raise SearxEngineAPIException(resp_json["error"])
+        raise TalvenEngineAPIException(resp_json["error"])
 
     for result in resp_json["hits"]["hits"]:
         kvmap = {key: str(value) if not key.startswith("_") else value for key, value in result["_source"].items()}

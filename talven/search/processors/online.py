@@ -13,9 +13,9 @@ import httpx
 import talven.network
 from talven.utils import gen_useragent
 from talven.exceptions import (
-    SearxEngineAccessDeniedException,
-    SearxEngineCaptchaException,
-    SearxEngineTooManyRequestsException,
+    TalvenEngineAccessDeniedException,
+    TalvenEngineCaptchaException,
+    TalvenEngineTooManyRequestsException,
 )
 from talven.metrics.error_recorder import count_error
 from .abstract import EngineProcessor, RequestParams
@@ -276,9 +276,9 @@ class OnlineProcessor(EngineProcessor):
                 )
             )
         except (
-            SearxEngineCaptchaException,
-            SearxEngineTooManyRequestsException,
-            SearxEngineAccessDeniedException,
+            TalvenEngineCaptchaException,
+            TalvenEngineTooManyRequestsException,
+            TalvenEngineAccessDeniedException,
         ) as e:
             self.handle_exception(result_container, e, suspend=True)
             self.logger.exception(e.message)

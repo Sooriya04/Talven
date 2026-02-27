@@ -7,7 +7,7 @@ import re
 import json
 
 from talven.utils import html_to_text
-from talven.exceptions import talvenEngineAPIException, SearxEngineCaptchaException
+from talven.exceptions import TalvenEngineAPIException, TalvenEngineCaptchaException
 
 # Metadata
 about = {
@@ -45,7 +45,7 @@ def is_alibaba_captcha(html):
 
 def init(_):
     if quark_category not in ('general', 'images'):
-        raise SearxEngineAPIException(f"Unsupported category: {quark_category}")
+        raise TalvenEngineAPIException(f"Unsupported category: {quark_category}")
 
 
 def request(query, params):
@@ -85,7 +85,7 @@ def response(resp):
     text = resp.text
 
     if is_alibaba_captcha(text):
-        raise SearxEngineCaptchaException(
+        raise TalvenEngineCaptchaException(
             suspended_time=900, message="Alibaba CAPTCHA detected. Please try again later."
         )
 

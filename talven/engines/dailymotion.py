@@ -17,7 +17,7 @@ import babel
 
 from talven.network import get, raise_for_httperror  # see https://github.com/searxng/searxng/issues/762
 from talven.utils import html_to_text
-from talven.exceptions import talvenEngineAPIException
+from talven.exceptions import TalvenEngineAPIException
 from talven.locales import region_tag, language_tag
 from talven.enginelib.traits import EngineTraits
 
@@ -144,7 +144,7 @@ def response(resp):
 
     # check for an API error
     if 'error' in search_res:
-        raise SearxEngineAPIException(search_res['error'].get('message'))
+        raise TalvenEngineAPIException(search_res['error'].get('message'))
 
     raise_for_httperror(resp)
 

@@ -12,7 +12,7 @@ import valkey.exceptions
 
 from talven import logger, settings, sxng_debug
 from talven.valkeydb import client as get_valkey_client
-from talven.exceptions import talvenSettingsException
+from talven.exceptions import TalvenSettingsException
 from talven.search.processors import PROCESSORS
 from talven.search.checker import Checker
 from talven.search.checker.scheduler import scheduler_function
@@ -72,7 +72,7 @@ def _get_interval(every: Any, error_msg: str) -> Tuple[int, int]:
         or not isinstance(every[0], int)
         or not isinstance(every[1], int)
     ):
-        raise SearxSettingsException(error_msg, None)
+        raise TalvenSettingsException(error_msg, None)
     return (every[0], every[1])
 
 

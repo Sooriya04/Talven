@@ -42,7 +42,7 @@ from datetime import datetime
 from urllib.parse import urlencode
 
 from talven.utils import html_to_text
-from talven.exceptions import talvenEngineAPIException
+from talven.exceptions import TalvenEngineAPIException
 from talven.result_types import EngineResults
 
 if t.TYPE_CHECKING:
@@ -128,7 +128,7 @@ def response(resp: "SXNG_Response") -> EngineResults:
     json_data: dict[str, dict[str, t.Any]] = resp.json()
 
     if "error" in json_data:
-        raise SearxEngineAPIException(json_data["error"]["msg"])
+        raise TalvenEngineAPIException(json_data["error"]["msg"])
 
     def _str(k: str) -> str:
         return str(doc.get(k, ""))

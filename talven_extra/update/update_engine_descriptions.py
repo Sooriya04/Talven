@@ -16,7 +16,7 @@ from os.path import join
 from lxml.html import fromstring
 
 from talven.engines import wikidata, set_loggers
-from talven.utils import extract_text, searxng_useragent
+from talven.utils import extract_text, talven_useragent
 from talven.locales import LOCALE_NAMES, locales_initialize, match_locale
 from talven import talven_dir
 from talven.utils import gen_useragent, detect_language
@@ -113,7 +113,7 @@ def get_wikipedia_summary(wikipedia_url, searxng_locale):
     # get the REST API URL from the HTML URL
 
     # Headers
-    headers = {'User-Agent': searxng_useragent()}
+    headers = {'User-Agent': talven_useragent()}
 
     if searxng_locale in WIKIPEDIA_LANGUAGE_VARIANTS:
         headers['Accept-Language'] = WIKIPEDIA_LANGUAGE_VARIANTS.get(searxng_locale)

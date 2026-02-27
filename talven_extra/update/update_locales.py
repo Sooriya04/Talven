@@ -23,8 +23,8 @@ from talven.locales import (
     get_translation_locales,
 )
 
-LOCALE_DATA_FILE = Path(searx_dir) / 'data' / 'locales.json'
-TRANSLATIONS_FOLDER = Path(searx_dir) / 'translations'
+LOCALE_DATA_FILE = Path(talven_dir) / 'data' / 'locales.json'
+TRANSLATIONS_FOLDER = Path(talven_dir) / 'translations'
 
 
 def main():

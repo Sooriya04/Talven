@@ -29,7 +29,7 @@ Implementations
 
 import typing as t
 from urllib.parse import urlencode
-from talven.utils import talvenng_useragent
+from talven.utils import talven_useragent
 from talven.result_types import EngineResults
 from talven.extended_types import SXNG_Response
 
@@ -88,7 +88,7 @@ def request(query: str, params: dict[str, t.Any]):
     query_params = {"count": results_per_page, "nsfw": min(params["safesearch"], 1), "query": query}
 
     params["url"] = f"{base_url}/search?{urlencode(query_params)}"
-    params["headers"]["User-Agent"] = searxng_useragent()
+    params["headers"]["User-Agent"] = talven_useragent()
     params["headers"]["API-Key"] = api_key
 
 

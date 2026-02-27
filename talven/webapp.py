@@ -2,6 +2,12 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """WebApp - Pure API Version"""
 
+import sys
+import os
+
+# Add project root to sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import json
 from timeit import default_timer
 import flask
@@ -11,7 +17,7 @@ import talven
 from talven.extended_types import sxng_request
 from talven import logger, settings, get_setting
 from talven.botdetection import link_token
-from talven.exceptions import talvenParameterException
+from talven.exceptions import TalvenParameterException
 from talven.engines import categories, engines
 from talven import webutils
 from talven.webadapter import get_search_query_from_webapp
@@ -23,6 +29,9 @@ import talven.plugins
 # Remove UI-related settings that might cause issues if folders are missing
 settings['ui']['static_path'] = ''
 settings['ui']['templates_path'] = ''
+
+# Initialize search (loads engines, network, metrics)
+talven.search.initialize()
 
 logger = logger.getChild('webapp')
 
@@ -107,8 +116,8 @@ def search():
         search_obj = talven.search.SearchWithPlugins(search_query, sxng_request, sxng_request.user_plugins)
         result_container = search_obj.search()
 
-    except SearxParameterException as e:
-        logger.exception('search error: SearxParameterException')
+    except TalvenParameterException as e:
+        logger.exception('search error: TalvenParameterException')
         return Response(json.dumps({'error': e.message}), status=400, mimetype='application/json')
     except Exception as e:
         logger.exception(e, exc_info=True)

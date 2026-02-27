@@ -4,7 +4,7 @@
 from urllib.parse import urlencode
 from lxml import html
 from talven.network import get
-from talven.exceptions import talvenEngineAccessDeniedException
+from talven.exceptions import TalvenEngineAccessDeniedException
 from talven.utils import (
     extract_text,
     eval_xpath_list,
@@ -46,7 +46,7 @@ def request(query, params):
 
 def response(resp):
     if resp.url.path.startswith('/verify'):
-        raise SearxEngineAccessDeniedException()
+        raise TalvenEngineAccessDeniedException()
 
     results = []
 

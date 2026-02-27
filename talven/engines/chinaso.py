@@ -61,7 +61,7 @@ import secrets
 from urllib.parse import urlencode
 from datetime import datetime
 
-from talven.exceptions import talvenEngineAPIException
+from talven.exceptions import TalvenEngineAPIException
 from talven.utils import html_to_text
 
 about = {
@@ -154,7 +154,7 @@ def response(resp):
     try:
         data = resp.json()
     except Exception as e:
-        raise SearxEngineAPIException(f"Invalid response: {e}") from e
+        raise TalvenEngineAPIException(f"Invalid response: {e}") from e
 
     parsers = {'news': parse_news, 'images': parse_images, 'videos': parse_videos}
 
@@ -164,7 +164,7 @@ def response(resp):
 def parse_news(data):
     results = []
     if not data.get("data", {}).get("data"):
-        raise SearxEngineAPIException("Invalid response")
+        raise TalvenEngineAPIException("Invalid response")
 
     for entry in data["data"]["data"]:
         published_date = None
@@ -188,7 +188,7 @@ def parse_news(data):
 def parse_images(data):
     results = []
     if not data.get("data", {}).get("arrRes"):
-        raise SearxEngineAPIException("Invalid response")
+        raise TalvenEngineAPIException("Invalid response")
 
     for entry in data["data"]["arrRes"]:
         results.append(
@@ -207,7 +207,7 @@ def parse_images(data):
 def parse_videos(data):
     results = []
     if not data.get("data", {}).get("arrRes"):
-        raise SearxEngineAPIException("Invalid response")
+        raise TalvenEngineAPIException("Invalid response")
 
     for entry in data["data"]["arrRes"]:
         published_date = None

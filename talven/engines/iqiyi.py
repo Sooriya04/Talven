@@ -6,7 +6,7 @@ import typing
 from urllib.parse import urlencode
 from datetime import datetime, timedelta
 
-from talven.exceptions import talvenEngineAPIException
+from talven.exceptions import TalvenEngineAPIException
 
 about = {
     "website": "https://www.iqiyi.com/",
@@ -62,11 +62,11 @@ def response(resp):
     try:
         data = resp.json()
     except Exception as e:
-        raise SearxEngineAPIException(f"Invalid response: {e}") from e
+        raise TalvenEngineAPIException(f"Invalid response: {e}") from e
     results = []
 
     if "data" not in data or "templates" not in data["data"]:
-        raise SearxEngineAPIException("Invalid response")
+        raise TalvenEngineAPIException("Invalid response")
 
     for entry in data["data"]["templates"]:
         album_info = entry.get("albumInfo", {})

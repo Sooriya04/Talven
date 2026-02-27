@@ -26,7 +26,7 @@ import babel.languages
 from talven.utils import extract_text, eval_xpath, eval_xpath_list, eval_xpath_getindex, gen_gsa_useragent
 from talven.locales import language_tag, region_tag, get_official_locales
 from talven.network import get  # see https://github.com/searxng/searxng/issues/762
-from talven.exceptions import talvenEngineCaptchaException
+from talven.exceptions import TalvenEngineCaptchaException
 from talven.enginelib.traits import EngineTraits
 from talven.result_types import EngineResults
 
@@ -275,7 +275,7 @@ def get_google_info(params: "OnlineParams", eng_traits: EngineTraits) -> dict[st
 
 def detect_google_sorry(resp):
     if resp.url.host == 'sorry.google.com' or resp.url.path.startswith('/sorry'):
-        raise SearxEngineCaptchaException()
+        raise TalvenEngineCaptchaException()
 
 
 def request(query: str, params: "OnlineParams") -> None:

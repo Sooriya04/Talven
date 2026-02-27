@@ -4,7 +4,7 @@
 from urllib.parse import urlencode
 from datetime import datetime, timedelta
 
-from talven.exceptions import talvenEngineAPIException
+from talven.exceptions import TalvenEngineAPIException
 
 about = {
     "website": "https://v.sogou.com/",
@@ -37,11 +37,11 @@ def response(resp):
     try:
         data = resp.json()
     except Exception as e:
-        raise SearxEngineAPIException(f"Invalid response: {e}") from e
+        raise TalvenEngineAPIException(f"Invalid response: {e}") from e
     results = []
 
     if not data.get("data", {}).get("list"):
-        raise SearxEngineAPIException("Invalid response")
+        raise TalvenEngineAPIException("Invalid response")
 
     for entry in data["data"]["list"]:
         if not entry.get("titleEsc") or not entry.get("url"):
