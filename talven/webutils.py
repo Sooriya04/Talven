@@ -161,11 +161,20 @@ class JSONEncoder(json.JSONEncoder):  # pylint: disable=missing-class-docstring
 
 def get_json_response(sq: "SearchQuery", rc: "ResultContainer") -> str:
     """Returns the JSON string of the results to a query (``application/json``)"""
+    
+    fields_to_remove = {
+        'template', 'parsed_url', 'img_src', 'thumbnail', 
+        'priority', 'publishedDate', 'positions'
+    }
+    
+    def clean_dict(d):
+        return {k: v for k, v in d.items() if k not in fields_to_remove}
+
     data = {
         'query': sq.query,
         'number_of_results': rc.number_of_results,
-        'results': [_.as_dict() for _ in rc.get_ordered_results()],
-        'answers': [_.as_dict() for _ in rc.answers],
+        'results': [clean_dict(_.as_dict()) for _ in rc.get_ordered_results()],
+        'answers': [clean_dict(_.as_dict()) for _ in rc.answers],
         'corrections': list(rc.corrections),
         'infoboxes': rc.infoboxes,
         'suggestions': list(rc.suggestions),

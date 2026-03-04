@@ -125,6 +125,28 @@ def search():
 
     # Return JSON response
     response_content = webutils.get_json_response(search_query, result_container)
+    
+    # Store response in SQLite
+    try:
+        import sqlite3
+        db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'search_logs.sqlite')
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS search_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                query TEXT,
+                response JSON
+            )
+        ''')
+        cursor.execute('INSERT INTO search_logs (query, response) VALUES (?, ?)', 
+                      (search_query.query, response_content))
+        conn.commit()
+        conn.close()
+    except Exception as db_e:
+        logger.error(f"Failed to log to SQLite: {db_e}")
+
     return Response(response_content, mimetype='application/json')
 
 if __name__ == "__main__":
