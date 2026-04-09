@@ -29,4 +29,4 @@ searx/version_frozen.py
 .python-version
 .txt
 /home/sooriya/workspace/Talven/talven/search_logs.sqlite
-*sqlite
+*.sqlite
