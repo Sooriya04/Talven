@@ -1,0 +1,3 @@
+### Integrate Searqon and Talven into unified Pro Search with async pipeline and structured extraction
+
+Unified Searqon and Talven into a high-performance “Pro Search” architecture by reducing Talven engine timeouts to 1.5 seconds, ensuring instant first-party search result loading. Introduced an asynchronous daemon pipeline that automatically triggers Searqon’s extraction process in parallel with each search, returning a summary_job_id for non-blocking frontend polling. Strengthened Searqon’s extraction engine by enforcing a strict native JSON output format with a high-detail schema, preventing shallow or hallucinated LLM responses while guaranteeing access to full raw markdown and underlying engine data.

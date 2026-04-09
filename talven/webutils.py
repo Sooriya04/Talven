@@ -159,6 +159,73 @@ class JSONEncoder(json.JSONEncoder):  # pylint: disable=missing-class-docstring
         return super().default(o)
 
 
+import httpx
+import uuid
+import threading
+import json
+
+summary_jobs = {}
+
+def run_summary_daemon(job_id, sq_query, talven_urls):
+    """Background thread function to execute Searqon summary without blocking WSGI."""
+    try:
+        summary_jobs[job_id]['status'] = 'running'
+        
+        searqon_url = None
+        try:
+            with httpx.Client(timeout=15.0) as client:
+                resp = client.post("http://127.0.0.1:3001/api/v1/crawl/search", json={"query": sq_query, "limit": 1})
+                if resp.status_code == 200:
+                    s_data = resp.json().get('data', [])
+                    if s_data and s_data[0].get('url'):
+                        searqon_url = s_data[0]['url']
+        except Exception as e:
+            logger.error(f"Failed to get searqon native URL: {e}")
+
+        extract_urls = []
+        for u in talven_urls:
+            extract_urls.append({"url": u, "origin": "talven"})
+        if searqon_url:
+            extract_urls.append({"url": searqon_url, "origin": "searqon"})
+
+        summary_results_dict = {}
+
+        if extract_urls:
+            prompt = (
+                f"You are an AI assistant. The user queried: '{sq_query}'. "
+                f"Analyze the web pages and provide a list of the most critical facts. "
+                f"Explicitly mention if a fact came from Talven or Searqon."
+            )
+            
+            structured_schema = {
+                "short_summary": "A brief overview of the search query.",
+                "key_facts": ["Fact 1 (from Talven)", "Fact 2 (from Searqon)"]
+            }
+
+            with httpx.Client(timeout=60.0) as client:
+                resp = client.post("http://127.0.0.1:3001/api/v1/crawl/extract", json={
+                    "urls": extract_urls,
+                    "query": sq_query,
+                    "prompt": prompt,
+                    "schema": structured_schema
+                })
+                if resp.status_code == 200:
+                    res_json = resp.json()
+                    if res_json.get("success"):
+                        summary_results_dict = res_json
+                        
+                        if "data" not in summary_results_dict:
+                            summary_results_dict["data"] = {}
+                            
+                        summary_results_dict["data"]["full_source_text"] = summary_results_dict.get("metadata", {}).get("sources", [])
+
+        summary_jobs[job_id]['status'] = 'completed'
+        summary_jobs[job_id]['result'] = summary_results_dict
+    except Exception as e:
+        logger.exception(e)
+        summary_jobs[job_id]['status'] = 'failed'
+        summary_jobs[job_id]['error'] = str(e)
+
 def get_json_response(sq: "SearchQuery", rc: "ResultContainer") -> str:
     """Returns the JSON string of the results to a query (``application/json``)"""
     
@@ -180,6 +247,25 @@ def get_json_response(sq: "SearchQuery", rc: "ResultContainer") -> str:
         'suggestions': list(rc.suggestions),
         'unresponsive_engines': get_translated_errors(rc.unresponsive_engines),
     }
+
+    # Intercept top 2 results and auto-run Searqon extraction implicitly in background
+    talven_urls = [res.get('url') for res in data['results'][:2] if res.get('url')]
+    if talven_urls:
+        job_id = str(uuid.uuid4())
+        summary_jobs[job_id] = {
+            'id': job_id,
+            'status': 'pending',
+            'query': sq.query,
+            'result': None,
+            'error': None
+        }
+        
+        thread = threading.Thread(target=run_summary_daemon, args=(job_id, sq.query, talven_urls), daemon=True)
+        thread.start()
+        
+        # Give frontend the auto-generated job_id to poll immediately
+        data['summary_job_id'] = job_id
+
     response = json.dumps(data, cls=JSONEncoder)
     return response
 

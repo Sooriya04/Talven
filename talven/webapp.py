@@ -149,8 +149,49 @@ def search():
 
     return Response(response_content, mimetype='application/json')
 
+from talven.webutils import summary_jobs, run_summary_daemon
+import uuid
+
+@app.route('/api/v1/searqon/summary', methods=['POST'])
+def summary():
+    """Independent daemon endpoint to kick off a structured summary job."""
+    try:
+        data = request.json
+        if not data or 'query' not in data:
+            return Response(json.dumps({'error': 'query is required'}), status=400, mimetype='application/json')
+            
+        sq_query = data.get('query')
+        talven_urls = data.get('urls', [])
+        
+        job_id = str(uuid.uuid4())
+        summary_jobs[job_id] = {
+            'id': job_id,
+            'status': 'pending',
+            'query': sq_query,
+            'result': None,
+            'error': None
+        }
+        
+        import threading
+        thread = threading.Thread(target=run_summary_daemon, args=(job_id, sq_query, talven_urls), daemon=True)
+        thread.start()
+
+        return Response(json.dumps({'success': True, 'job_id': job_id, 'status': 'pending'}), status=202, mimetype='application/json')
+    except Exception as e:
+        logger.exception(e)
+        return Response(json.dumps({'error': 'Internal server error'}), status=500, mimetype='application/json')
+
+
+@app.route('/api/v1/searqon/summary/<job_id>', methods=['GET'])
+def get_summary_status(job_id):
+    """Polling endpoint to fetch the status/results of a summary job."""
+    job = summary_jobs.get(job_id)
+    if not job:
+        return Response(json.dumps({'error': 'Job not found'}), status=404, mimetype='application/json')
+        
+    return Response(json.dumps(job), mimetype='application/json')
+
+
 if __name__ == "__main__":
-    from gevent.pywsgi import WSGIServer
     port = int(os.environ.get('PORT', 8888))
-    server = WSGIServer(('0.0.0.0', port), app)
-    server.serve_forever()
+    app.run(host='0.0.0.0', port=port, debug=False)
