@@ -167,64 +167,65 @@ import json
 summary_jobs = {}
 
 def run_summary_daemon(job_id, sq_query, talven_urls):
-    """Background thread function to execute Searqon summary without blocking WSGI."""
+    """Background thread function to execute Lite summary using Classifier (Zero RAM)."""
     try:
         summary_jobs[job_id]['status'] = 'running'
+        print(f"\033[93m[BACKEND] [LITE SUMMARY] Job {job_id} started...\033[0m")
         
-        searqon_url = None
+        # 1. Fetch search results with content from Searqon Crawler (Port 3001)
+        documents = []
         try:
-            with httpx.Client(timeout=15.0) as client:
-                resp = client.post("http://127.0.0.1:3001/api/v1/crawl/search", json={"query": sq_query, "limit": 1})
+            with httpx.Client(timeout=20.0) as client:
+                # Get more results for better coverage in Lite mode
+                resp = client.post("http://127.0.0.1:3001/api/v1/crawl/search", json={"query": sq_query, "limit": 5})
                 if resp.status_code == 200:
-                    s_data = resp.json().get('data', [])
-                    if s_data and s_data[0].get('url'):
-                        searqon_url = s_data[0]['url']
+                    documents = resp.json().get('data', [])
         except Exception as e:
-            logger.error(f"Failed to get searqon native URL: {e}")
+            logger.error(f"Lite Summary: Failed to get search content: {e}")
 
-        extract_urls = []
-        for u in talven_urls:
-            extract_urls.append({"url": u, "origin": "talven"})
-        if searqon_url:
-            extract_urls.append({"url": searqon_url, "origin": "searqon"})
+        summary_results_dict = {
+            "title": f"✦ Search Insights: {sq_query.title()}",
+            "summary": f"Could not find enough detailed information to summarize '{sq_query}' at this time.",
+            "key_facts": []
+        }
 
-        summary_results_dict = {}
-
-        if extract_urls:
-            prompt = (
-                f"You are an AI assistant. The user queried: '{sq_query}'. "
-                f"Analyze the web pages and provide a list of the most critical facts. "
-                f"Explicitly mention if a fact came from Talven or Searqon."
-            )
-            
-            structured_schema = {
-                "short_summary": "A brief overview of the search query.",
-                "key_facts": ["Fact 1 (from Talven)", "Fact 2 (from Searqon)"]
-            }
-
-            with httpx.Client(timeout=60.0) as client:
-                resp = client.post("http://127.0.0.1:3001/api/v1/crawl/extract", json={
-                    "urls": extract_urls,
-                    "query": sq_query,
-                    "prompt": prompt,
-                    "schema": structured_schema
-                })
-                if resp.status_code == 200:
-                    res_json = resp.json()
-                    if res_json.get("success"):
-                        summary_results_dict = res_json
+        if documents:
+            # 2. Extract highlights using Lite Classifier (Port 3003)
+            try:
+                with httpx.Client(timeout=10.0) as client:
+                    c_resp = client.post("http://127.0.0.1:3003/summarize", 
+                                       json={"query": sq_query, "documents": documents, "num_highlights": 6})
+                    if c_resp.status_code == 200:
+                        highlights = c_resp.json().get('highlights', [])
                         
-                        if "data" not in summary_results_dict:
-                            summary_results_dict["data"] = {}
+                        if highlights:
+                            top_h = highlights[0]
+                            others = highlights[1:]
                             
-                        summary_results_dict["data"]["full_source_text"] = summary_results_dict.get("metadata", {}).get("sources", [])
+                            # 3. State-of-the-Art Synthesis (Markdown Bold + JSON)
+                            summary_text = top_h['sentence']
+                            
+                            # Heuristic: Bold important terms from the query for "Premium" look
+                            for word in sq_query.split():
+                                if len(word) > 3:
+                                    summary_text = re.sub(f"(?i)({re.escape(word)})", r"**\1**", summary_text)
+                            
+                            summary_results_dict = {
+                                "title": f"✦ {top_h.get('title', sq_query.title())}",
+                                "summary": summary_text,
+                                "key_facts": [h['sentence'] for h in others if len(h['sentence']) > 20]
+                            }
+            except Exception as e:
+                logger.error(f"Lite Summary: Classifier failed: {e}")
 
         summary_jobs[job_id]['status'] = 'completed'
         summary_jobs[job_id]['result'] = summary_results_dict
+        print(f"\033[92m[BACKEND] [LITE SUMMARY] Job {job_id} completed successfully.\033[0m")
     except Exception as e:
         logger.exception(e)
         summary_jobs[job_id]['status'] = 'failed'
         summary_jobs[job_id]['error'] = str(e)
+        print(f"\033[91m[BACKEND] [LITE SUMMARY] Job {job_id} failed: {e}\033[0m")
 
 def get_json_response(sq: "SearchQuery", rc: "ResultContainer") -> str:
     """Returns the JSON string of the results to a query (``application/json``)"""

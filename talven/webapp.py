@@ -12,6 +12,7 @@ import json
 from timeit import default_timer
 import flask
 from flask import Flask, Response, request, redirect
+from datetime import datetime
 from flask_babel import Babel, gettext
 import talven
 from talven.extended_types import sxng_request
@@ -45,6 +46,13 @@ def get_locale():
     return 'en'
 
 babel = Babel(app, locale_selector=get_locale)
+
+def terminal_log(category, message, color="\033[94m"):
+    """Pretty print to terminal."""
+    reset = "\033[0m"
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    sys.stderr.write(f"{color}[{timestamp}] [{category.upper()}] {message}{reset}\n")
+    sys.stderr.flush()
 
 @app.before_request
 def pre_request():
@@ -113,8 +121,10 @@ def search():
         search_query, _, _, _, _ = get_search_query_from_webapp(
             sxng_request.preferences, sxng_request.form
         )
+        terminal_log("search", f"Query: {search_query.query}", color="\033[92m")
         search_obj = talven.search.SearchWithPlugins(search_query, sxng_request, sxng_request.user_plugins)
         result_container = search_obj.search()
+        terminal_log("search", f"Found {result_container.number_of_results} results", color="\033[92m")
 
     except TalvenParameterException as e:
         logger.exception('search error: TalvenParameterException')
@@ -172,6 +182,7 @@ def summary():
             'error': None
         }
         
+        terminal_log("summary", f"New request for: {sq_query} (Job: {job_id})", color="\033[95m")
         import threading
         thread = threading.Thread(target=run_summary_daemon, args=(job_id, sq_query, talven_urls), daemon=True)
         thread.start()
@@ -189,7 +200,16 @@ def get_summary_status(job_id):
     if not job:
         return Response(json.dumps({'error': 'Job not found'}), status=404, mimetype='application/json')
         
-    return Response(json.dumps(job), mimetype='application/json')
+    # Strictly return the format requested by the mobile app: {status, result}
+    response_data = {
+        'status': job.get('status', 'pending'),
+        'result': job.get('result')
+    }
+    
+    if job.get('error'):
+        response_data['error'] = job['error']
+        
+    return Response(json.dumps(response_data), mimetype='application/json')
 
 
 if __name__ == "__main__":

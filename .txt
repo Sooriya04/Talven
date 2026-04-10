@@ -1,28 +1,6 @@
-now remove that 
-summary_result from result, bcuz it browser u know so like 
-it took 20s 
-we build seperate pipeline for it 
-don't include it in the json returning
-it needs to run indepelty 
-as soon as the  user search soemthing
-Like http://127.0.0.1:8000/search?q=lightpanda+browser&format=json
-it needs to exceute in the backend and send result to frontend when it ready okay make it like that
-
-
-user hitting this
-http://127.0.0.1:8000/search?q=lightpanda+browser&format=json
-
-it needs to show all the results as soon as possible 
-
-but that summaries_result need to run seperatly 
-and show the result to user okay
-
-make it like this
-http://127.0.0.1:8000/v1/searqon/user [make it proffesional for as endpoint]
-{
-    query : "lightpanda"
-    url : ['url1 from talven', 'url2 from talven']
-}
-
-scarpe and send the reuslt accoridngly okay do it like that and give it's to mainly avoid the latency 
-bcuz for web browser it took too much time so fix that and give me properly 
+Update your Python webapp.py to provide a "Context-Rich" response.
+Modify the /get_summary endpoint (or create a new one): Instead of returning a generated string, it should return a JSON array of snippets or abstracts directly from the search engine (Talven/Google/Bing API).
+like don't summarise it 
+send the response directly without summarise
+I will use tinybert on mobile to summarise it 
+and tell me how the 
