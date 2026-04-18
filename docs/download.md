@@ -48,7 +48,7 @@ See [Configuration Guide](configuration.md) for details.
 Start the server:
 
 ```bash
-granian --interface wsgi talven.webapp:app
+granian --host 0.0.0.0 --interface wsgi talven.webapp:app
 ```
 
 The API will be available at `http://127.0.0.1:8888`.

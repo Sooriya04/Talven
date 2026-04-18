@@ -8,6 +8,19 @@ import os
 # Add project root to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Simple .env loader since python-dotenv is not installed
+def load_env():
+    env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
+    if os.path.exists(env_path):
+        with open(env_path, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    os.environ[key.strip()] = value.strip()
+
+load_env()
+
 import json
 from timeit import default_timer
 import flask
@@ -107,10 +120,6 @@ def health():
 def search():
     """Search query and return JSON results."""
     
-    # Force JSON format if not specified (though pre_request handles default)
-    # We ignore csv/rss for now to keep it "pure application/json" unless user specifically requested otherwise and we want to support it. 
-    # For now, let's strictly enforce JSON or generic error.
-    
     if not sxng_request.form.get('q'):
         return Response(json.dumps({'error': 'No query provided'}), status=400, mimetype='application/json')
 
@@ -159,59 +168,16 @@ def search():
 
     return Response(response_content, mimetype='application/json')
 
-from talven.webutils import summary_jobs, run_summary_daemon
-import uuid
-
-@app.route('/api/v1/searqon/summary', methods=['POST'])
-def summary():
-    """Independent daemon endpoint to kick off a structured summary job."""
-    try:
-        data = request.json
-        if not data or 'query' not in data:
-            return Response(json.dumps({'error': 'query is required'}), status=400, mimetype='application/json')
-            
-        sq_query = data.get('query')
-        talven_urls = data.get('urls', [])
-        
-        job_id = str(uuid.uuid4())
-        summary_jobs[job_id] = {
-            'id': job_id,
-            'status': 'pending',
-            'query': sq_query,
-            'result': None,
-            'error': None
-        }
-        
-        terminal_log("summary", f"New request for: {sq_query} (Job: {job_id})", color="\033[95m")
-        import threading
-        thread = threading.Thread(target=run_summary_daemon, args=(job_id, sq_query, talven_urls), daemon=True)
-        thread.start()
-
-        return Response(json.dumps({'success': True, 'job_id': job_id, 'status': 'pending'}), status=202, mimetype='application/json')
-    except Exception as e:
-        logger.exception(e)
-        return Response(json.dumps({'error': 'Internal server error'}), status=500, mimetype='application/json')
-
-
-@app.route('/api/v1/searqon/summary/<job_id>', methods=['GET'])
-def get_summary_status(job_id):
-    """Polling endpoint to fetch the status/results of a summary job."""
-    job = summary_jobs.get(job_id)
+@app.route('/api/v1/summary/status/<job_id>', methods=['GET'])
+def summary_status(job_id):
+    """Retrieve the status and results of a background summary job."""
+    job = webutils.summary_jobs.get(job_id)
     if not job:
         return Response(json.dumps({'error': 'Job not found'}), status=404, mimetype='application/json')
-        
-    # Strictly return the format requested by the mobile app: {status, result}
-    response_data = {
-        'status': job.get('status', 'pending'),
-        'result': job.get('result')
-    }
     
-    if job.get('error'):
-        response_data['error'] = job['error']
-        
-    return Response(json.dumps(response_data), mimetype='application/json')
-
+    return Response(json.dumps(job), mimetype='application/json')
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 8888))
     app.run(host='0.0.0.0', port=port, debug=False)
+

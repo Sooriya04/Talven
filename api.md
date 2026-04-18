@@ -1,6 +1,6 @@
-# Vylph API Documentation
+# Talven API Documentation
 
-Vylph provides a simple, JSON-based REST API for retrieving search results.
+Talven provides a simple, JSON-based REST API for retrieving search results.
 
 ## Base URL
 

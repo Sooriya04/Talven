@@ -10,9 +10,10 @@ import hmac
 import re
 import itertools
 import json
+import uuid
+import threading
 from datetime import datetime, timedelta
 from typing import Iterable, List, Tuple, TYPE_CHECKING
-
 from io import StringIO
 from codecs import getincrementalencoder
 
@@ -65,6 +66,25 @@ exception_classname_to_text = {
     'ssl.SSLCertVerificationError': ssl_cert_error_text,  # for Python > 3.7
     'ssl.CertificateError': ssl_cert_error_text,  # for Python 3.7
 }
+
+# Global state for asynchronous Search & Scrape jobs
+summary_jobs = {}
+
+def run_summary_daemon(job_id, query, urls):
+    """Background thread function to fetch and store summary results."""
+    from talven.searqon import get_searqon_results
+    try:
+        results = get_searqon_results(query, urls)
+        summary_jobs[job_id].update({
+            'status': 'completed',
+            'result': results
+        })
+    except Exception as e:
+        logger.error(f"Summary daemon failed for job {job_id}: {e}")
+        summary_jobs[job_id].update({
+            'status': 'error',
+            'error': str(e)
+        })
 
 
 def get_translated_errors(unresponsive_engines: "Iterable[UnresponsiveEngine]"):
@@ -159,73 +179,6 @@ class JSONEncoder(json.JSONEncoder):  # pylint: disable=missing-class-docstring
         return super().default(o)
 
 
-import httpx
-import uuid
-import threading
-import json
-
-summary_jobs = {}
-
-def run_summary_daemon(job_id, sq_query, talven_urls):
-    """Background thread function to execute Lite summary using Classifier (Zero RAM)."""
-    try:
-        summary_jobs[job_id]['status'] = 'running'
-        print(f"\033[93m[BACKEND] [LITE SUMMARY] Job {job_id} started...\033[0m")
-        
-        # 1. Fetch search results with content from Searqon Crawler (Port 3001)
-        documents = []
-        try:
-            with httpx.Client(timeout=20.0) as client:
-                # Get more results for better coverage in Lite mode
-                resp = client.post("http://127.0.0.1:3001/api/v1/crawl/search", json={"query": sq_query, "limit": 5})
-                if resp.status_code == 200:
-                    documents = resp.json().get('data', [])
-        except Exception as e:
-            logger.error(f"Lite Summary: Failed to get search content: {e}")
-
-        summary_results_dict = {
-            "title": f"✦ Search Insights: {sq_query.title()}",
-            "summary": f"Could not find enough detailed information to summarize '{sq_query}' at this time.",
-            "key_facts": []
-        }
-
-        if documents:
-            # 2. Extract highlights using Lite Classifier (Port 3003)
-            try:
-                with httpx.Client(timeout=10.0) as client:
-                    c_resp = client.post("http://127.0.0.1:3003/summarize", 
-                                       json={"query": sq_query, "documents": documents, "num_highlights": 6})
-                    if c_resp.status_code == 200:
-                        highlights = c_resp.json().get('highlights', [])
-                        
-                        if highlights:
-                            top_h = highlights[0]
-                            others = highlights[1:]
-                            
-                            # 3. State-of-the-Art Synthesis (Markdown Bold + JSON)
-                            summary_text = top_h['sentence']
-                            
-                            # Heuristic: Bold important terms from the query for "Premium" look
-                            for word in sq_query.split():
-                                if len(word) > 3:
-                                    summary_text = re.sub(f"(?i)({re.escape(word)})", r"**\1**", summary_text)
-                            
-                            summary_results_dict = {
-                                "title": f"✦ {top_h.get('title', sq_query.title())}",
-                                "summary": summary_text,
-                                "key_facts": [h['sentence'] for h in others if len(h['sentence']) > 20]
-                            }
-            except Exception as e:
-                logger.error(f"Lite Summary: Classifier failed: {e}")
-
-        summary_jobs[job_id]['status'] = 'completed'
-        summary_jobs[job_id]['result'] = summary_results_dict
-        print(f"\033[92m[BACKEND] [LITE SUMMARY] Job {job_id} completed successfully.\033[0m")
-    except Exception as e:
-        logger.exception(e)
-        summary_jobs[job_id]['status'] = 'failed'
-        summary_jobs[job_id]['error'] = str(e)
-        print(f"\033[91m[BACKEND] [LITE SUMMARY] Job {job_id} failed: {e}\033[0m")
 
 def get_json_response(sq: "SearchQuery", rc: "ResultContainer") -> str:
     """Returns the JSON string of the results to a query (``application/json``)"""
@@ -269,6 +222,7 @@ def get_json_response(sq: "SearchQuery", rc: "ResultContainer") -> str:
 
     response = json.dumps(data, cls=JSONEncoder)
     return response
+
 
 
 def get_themes(templates_path):
