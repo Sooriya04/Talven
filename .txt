@@ -1,6 +1,0 @@
-Update your Python webapp.py to provide a "Context-Rich" response.
-Modify the /get_summary endpoint (or create a new one): Instead of returning a generated string, it should return a JSON array of snippets or abstracts directly from the search engine (Talven/Google/Bing API).
-like don't summarise it 
-send the response directly without summarise
-I will use tinybert on mobile to summarise it 
-and tell me how the 

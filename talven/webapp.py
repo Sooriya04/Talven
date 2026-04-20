@@ -168,14 +168,34 @@ def search():
 
     return Response(response_content, mimetype='application/json')
 
-@app.route('/api/v1/summary/status/<job_id>', methods=['GET'])
+@app.route('/api/v1/summary/<job_id>', methods=['GET', 'POST'])
+@app.route('/api/v1/searqon/summary/<job_id>', methods=['GET', 'POST'])
+@app.route('/api/v1/summary/status/<job_id>', methods=['GET', 'POST'])
 def summary_status(job_id):
-    """Retrieve the status and results of a background summary job."""
-    job = webutils.summary_jobs.get(job_id)
+    """Retrieve or update the status and results of a background summary job."""
+    
+    if request.method == 'POST':
+        # External push of summary data
+        data = request.json or {}
+        if job_id not in talven.webutils.summary_jobs:
+            return Response(json.dumps({'error': 'Job ID not found'}), status=404, mimetype='application/json')
+        
+        talven.webutils.summary_jobs[job_id].update({
+            'status': data.get('status', 'completed'),
+            'summary': data.get('summary'),
+            'result': data.get('result', data.get('sources')),
+            'full_source_text': data.get('full_source_text')
+        })
+        terminal_log("summary", f"Job {job_id} updated via POST (Status: {data.get('status')})", color="\033[95m")
+        return Response(json.dumps({'status': 'ok'}), mimetype='application/json')
+
+    # GET method - Polling
+    job = talven.webutils.summary_jobs.get(job_id)
     if not job:
         return Response(json.dumps({'error': 'Job not found'}), status=404, mimetype='application/json')
     
     return Response(json.dumps(job), mimetype='application/json')
+
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 8888))

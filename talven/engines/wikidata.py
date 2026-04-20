@@ -801,7 +801,9 @@ def init(engine_settings=None):  # pylint: disable=unused-argument
                 wikidata_property_names.append("wd:" + attribute.name)
     query = QUERY_PROPERTY_NAMES.replace('%ATTRIBUTES%', " ".join(wikidata_property_names))
     jsonresponse = send_wikidata_query(query, timeout=20)
-    for result in jsonresponse.get('results', {}).get('bindings', {}):
+    for result in jsonresponse.get('results', {}).get('bindings', []):
+        if 'name' not in result or 'item' not in result:
+            continue
         name = result['name']['value']
         lang = result['name']['xml:lang']
         entity_id = result['item']['value'].replace('http://www.wikidata.org/entity/', '')

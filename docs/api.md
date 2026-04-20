@@ -19,7 +19,7 @@ Defaults to `http://localhost:8888` (or your configured host/port).
 - **Response**:
   ```json
   {
-    "service": "Talven API",
+    "service": "SearXNG API",
     "version": "X.Y.Z",
     "message": "Pure RESTful API backend. Use /search endpoint."
   }

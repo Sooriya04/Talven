@@ -71,20 +71,40 @@ exception_classname_to_text = {
 summary_jobs = {}
 
 def run_summary_daemon(job_id, query, urls):
-    """Background thread function to fetch and store summary results."""
+    """Background thread function to fetch context and notify readiness."""
     from talven.searqon import get_searqon_results
     try:
-        results = get_searqon_results(query, urls)
+        # Move to running state
+        if job_id in summary_jobs:
+            summary_jobs[job_id]['status'] = 'running'
+            
+        # Gather results (without local summarizing now)
+        data = get_searqon_results(query, urls)
+        
+        # Update job with results. Summary will be None if relying on external push.
         summary_jobs[job_id].update({
-            'status': 'completed',
-            'result': results
+            'status': 'completed' if data.get('summary') else 'running',
+            'result': data.get('sources'),
+            'summary': data.get('summary'),
+            'full_source_text': data.get('full_source_text')
         })
+        
+        terminal_log("summary", f"Job {job_id} context ready. Status: {summary_jobs[job_id]['status']}", color="\033[96m")
+        
     except Exception as e:
         logger.error(f"Summary daemon failed for job {job_id}: {e}")
-        summary_jobs[job_id].update({
-            'status': 'error',
-            'error': str(e)
-        })
+        if job_id in summary_jobs:
+            summary_jobs[job_id].update({
+                'status': 'error',
+                'error': str(e)
+            })
+def terminal_log(category, message, color="\033[94m"):
+    """Pretty print to terminal (duplicated from webapp for convenience)."""
+    reset = "\033[0m"
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    os.sys.stderr.write(f"{color}[{timestamp}] [{category.upper()}] {message}{reset}\n")
+    os.sys.stderr.flush()
+
 
 
 def get_translated_errors(unresponsive_engines: "Iterable[UnresponsiveEngine]"):
@@ -202,7 +222,7 @@ def get_json_response(sq: "SearchQuery", rc: "ResultContainer") -> str:
         'unresponsive_engines': get_translated_errors(rc.unresponsive_engines),
     }
 
-    # Intercept top 2 results and auto-run Searqon extraction implicitly in background
+    # Intercept top 2 results and auto-run extraction in background
     talven_urls = [res.get('url') for res in data['results'][:2] if res.get('url')]
     if talven_urls:
         job_id = str(uuid.uuid4())
@@ -210,15 +230,18 @@ def get_json_response(sq: "SearchQuery", rc: "ResultContainer") -> str:
             'id': job_id,
             'status': 'pending',
             'query': sq.query,
+            'summary': None,
             'result': None,
+            'full_source_text': None,
             'error': None
         }
         
         thread = threading.Thread(target=run_summary_daemon, args=(job_id, sq.query, talven_urls), daemon=True)
         thread.start()
         
-        # Give frontend the auto-generated job_id to poll immediately
+        # Give frontend the job_id to poll immediately
         data['summary_job_id'] = job_id
+
 
     response = json.dumps(data, cls=JSONEncoder)
     return response
