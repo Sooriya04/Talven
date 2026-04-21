@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""Test script for modular Searqon AI Chat System"""
+"""Test script for modular Searqon AI Multi-Session Chat with UUIDv7"""
 
 import asyncio
 import os
@@ -12,30 +12,39 @@ from talven.searqon_ai import SearqonAIOrchestrator
 from talven.searqon_ai.storage import history_db
 
 async def main():
-    print("Initializing Searqon AI Chat Orchestrator...")
+    print("Initializing Multi-Session Chat Orchestrator...")
     orchestrator = SearqonAIOrchestrator()
     
-    query = "Hello! Can you help me understand how a chat system works?"
-    print(f"\nRunning chat for query: '{query}'")
+    # 1. Start a new conversation
+    print("\n--- Test 1: New Conversation ---")
+    query1 = "What is the capital of France?"
+    result1 = await orchestrator.chat(query1)
+    conv_id = result1['conversation_id']
+    print(f"New Conversation ID (UUIDv7): {conv_id}")
+    print(f"Response: {result1['response']}")
     
-    try:
-        result = await orchestrator.chat(query)
-        print("\nChat Result:")
-        print(f"Response: {result['response'][:200]}...")
-        
-        # Verify SQLite storage
-        print("\nVerifying SQLite storage...")
-        history = history_db.get_history(limit=1)
-        if history and history[0]['query'] == query:
-            print("Successfully stored in history.sqlite")
-        else:
-            print("Failed to find entry in history.sqlite")
-            
-    except Exception as e:
-        print(f"\nError during testing: {str(e)}")
+    # 2. Continue the same conversation
+    print("\n--- Test 2: Continue Conversation ---")
+    query2 = "And what is its most famous landmark?"
+    result2 = await orchestrator.chat(query2, conversation_id=conv_id)
+    print(f"Continued in ID: {result2['conversation_id']}")
+    print(f"Response: {result2['response']}")
+    
+    # 3. Verify history
+    print("\n--- Test 3: Verify History ---")
+    history = orchestrator.get_history(conv_id)
+    print(f"Total messages in thread: {len(history)}")
+    for msg in history:
+        print(f"  [{msg['role'].upper()}]: {msg['content'][:50]}...")
+    
+    # 4. List sessions
+    print("\n--- Test 4: List Sessions ---")
+    sessions = orchestrator.list_sessions()
+    print(f"Recent Sessions:")
+    for s in sessions:
+        print(f"  - {s['title']} (ID: {s['id']})")
 
 if __name__ == "__main__":
-    # Mocking environment variables for test if not set
     if 'OLLAMA_API_URL' not in os.environ:
         os.environ['OLLAMA_API_URL'] = 'http://127.0.0.1:11434/api/generate'
         
