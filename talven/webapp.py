@@ -195,6 +195,43 @@ def summary_status(job_id):
         return Response(json.dumps({'error': 'Job not found'}), status=404, mimetype='application/json')
     
     return Response(json.dumps(job), mimetype='application/json')
+ 
+# ─── SEARQON AI CHAT V2 ENDPOINTS ───────────────────────────────────────────
+from talven.searqon_ai.orchestrator import SearqonAIOrchestrator
+orchestrator = SearqonAIOrchestrator()
+
+@app.route('/api/v2/chat', methods=['POST'])
+def chat_v2():
+    """Execute AI Chat Synthesis with Session Management."""
+    data = request.json or {}
+    query = data.get('query')
+    conversation_id = data.get('conversation_id')
+    
+    if not query:
+        return Response(json.dumps({'error': 'No query provided'}), status=400, mimetype='application/json')
+    
+    import asyncio
+    # We use a helper to run the async orchestrator in a sync Flask route
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        result = loop.run_until_complete(orchestrator.chat(query, conversation_id))
+        return Response(json.dumps(result), mimetype='application/json')
+    finally:
+        loop.close()
+
+@app.route('/api/v2/sessions', methods=['GET'])
+def list_sessions_v2():
+    """List all chat sessions."""
+    sessions = orchestrator.list_sessions()
+    return Response(json.dumps(sessions), mimetype='application/json')
+
+@app.route('/api/v2/history/<conversation_id>', methods=['GET'])
+def get_history_v2(conversation_id):
+    """Get full message history for a conversation."""
+    history = orchestrator.get_history(conversation_id)
+    return Response(json.dumps(history), mimetype='application/json')
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 if __name__ == "__main__":

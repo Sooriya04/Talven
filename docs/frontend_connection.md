@@ -16,7 +16,7 @@ import asyncio
 app = Flask(__name__)
 orchestrator = SearqonAIOrchestrator()
 
-@app.route('/api/v2/chat', methods=['POST'])
+@app.route('/api/v2/chats', methods=['POST'])
 def chat():
     data = request.json
     query = data.get('query')
@@ -55,7 +55,7 @@ We use **UUIDv7** for all IDs. Unlike standard UUIDs (v4), UUIDv7 is **time-orde
 ### Starting a New Chat
 ```javascript
 // Leave conversation_id empty to start a new thread
-const res = await fetch('/api/v2/chat', {
+const res = await fetch('http://localhost:8000/api/v2/chats', {
   method: 'POST',
   body: JSON.stringify({ query: "Hello! Who are you?" })
 });
@@ -66,7 +66,7 @@ const currentConvId = data.conversation_id; // Save this for the next message!
 ### Continuing a Chat
 ```javascript
 // Pass the conversation_id to keep the context
-const res = await fetch('/api/v2/chat', {
+const res = await fetch('http://localhost:8000/api/v2/chats', {
   method: 'POST',
   body: JSON.stringify({ 
     query: "Tell me more about that.", 
@@ -77,7 +77,7 @@ const res = await fetch('/api/v2/chat', {
 
 ### Loading Session Sidebar
 ```javascript
-const res = await fetch('/api/v2/sessions');
+const res = await fetch('http://localhost:8000/api/v2/sessions');
 const sessions = await res.json();
 // Render your sidebar with session titles and IDs
 ```
